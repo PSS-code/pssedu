@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Kelistrikan Dasar - SMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+      body {
+        font-family: "Poppins", sans-serif;
+      }
+      .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+      .card-shadow {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      .pulse-animation {
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+      .timer-warning {
+        animation: shake 0.5s ease-in-out infinite;
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+    </style>
+  </head>
+  <body class="gradient-bg min-h-screen">
+    <!-- Start Screen -->
+    <div
+      id="startScreen"
+      class="min-h-screen flex items-center justify-center p-4"
+    >
+      <div class="bg-white rounded-3xl card-shadow p-8 max-w-md w-full">
+        <div class="text-center mb-8">
+          <div class="text-6xl mb-4">⚡</div>
+          <h1 class="text-3xl font-bold text-gray-800 mb-2">
+            Quiz Kelistrikan Dasar
+          </h1>
+          <p class="text-gray-600">SMK - Konsep Dasar Kelistrikan</p>
+        </div>
+
+        <form id="studentForm" class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Nama Lengkap</label
+            >
+            <input
+              type="text"
+              id="studentName"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Kelas</label
+            >
+            <select
+              id="studentClass"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            >
+              <option value="">Pilih Kelas</option>
+              <option value="XI TKT A">XI TKR A</option>
+              <option value="XI TKR B">XI TKR B</option>
+              <option value="XI TKR C">XI TKR C</option>
+            </select>
+          </div>
+
+          <div class="bg-blue-50 p-4 rounded-xl">
+            <h3 class="font-semibold text-blue-800 mb-2">Aturan Quiz:</h3>
+            <ul class="text-sm text-blue-700 space-y-1">
+              <li>• atos ibak</li>
+              <li>• atos gosok gigi</li>
+              <li>• baca do'a tong hilap</li>
+              <li>• sebelum mulai teriakan "TKR WARAS"</li>
+            </ul>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-xl font-semibold text-lg hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all pulse-animation"
+          >
+            Gazzz Mulai Quiz ⚡
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div id="quizScreen" class="hidden min-h-screen p-4">
+      <!-- Header -->
+      <div class="bg-white rounded-2xl card-shadow p-4 mb-6">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-bold text-gray-800" id="studentInfo"></h2>
+            <p class="text-gray-600">
+              Soal <span id="currentQuestion">1</span> dari berapa ayooo tebak
+            </p>
+          </div>
+          <div class="text-right">
+            <div id="timer" class="text-3xl font-bold text-blue-600">30</div>
+            <p class="text-sm text-gray-600">detik</p>
+          </div>
+        </div>
+        <div class="mt-4">
+          <div class="bg-gray-200 rounded-full h-3">
+            <div
+              id="progressBar"
+              class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-300"
+              style="width: 1%"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question Card -->
+      <div class="bg-white rounded-2xl card-shadow p-6 mb-6">
+        <div class="mb-6">
+          <span
+            id="questionType"
+            class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium mb-4"
+          ></span>
+          <h3
+            id="questionText"
+            class="text-xl font-semibold text-gray-800 leading-relaxed"
+          ></h3>
+        </div>
+
+        <div id="optionsContainer" class="space-y-3">
+          <!-- Options will be inserted here -->
+        </div>
+      </div>
+
+      <!-- Score Display -->
+      <div class="bg-white rounded-2xl card-shadow p-4">
+        <div class="flex justify-between items-center">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-green-600" id="correctCount">
+              0
+            </div>
+            <p class="text-sm text-gray-600">Benar</p>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-red-600" id="wrongCount">0</div>
+            <p class="text-sm text-gray-600">Salah</p>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-blue-600" id="scoreDisplay">
+              0
+            </div>
+            <p class="text-sm text-gray-600">Skor</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Break Screen -->
+    <div
+      id="breakScreen"
+      class="hidden min-h-screen flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-white rounded-3xl card-shadow p-8 max-w-md w-full text-center"
+      >
+        <div class="text-6xl mb-6">☕</div>
+        <h2 class="text-3xl font-bold text-gray-800 mb-4">
+          Waktu Istirahat, bernapas dulu bro
+        </h2>
+        <p class="text-gray-600 mb-6">
+          Anda telah menyelesaikan <span id="completedQuestions">10</span> soal!
+        </p>
+
+        <div
+          class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-6"
+        >
+          <div class="text-4xl font-bold text-blue-600 mb-2" id="breakTimer">
+            60
+          </div>
+          <p class="text-gray-600">detik tersisa</p>
+          <div class="mt-4">
+            <div class="bg-gray-200 rounded-full h-2">
+              <div
+                id="breakProgressBar"
+                class="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-1000"
+                style="width: 100%"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-yellow-50 p-4 rounded-xl mb-6">
+          <h3 class="font-semibold text-yellow-800 mb-2">💡 Tips Belajar:</h3>
+          <p id="breakTip" class="text-sm text-yellow-700">
+            lupakan mantan dan Ingat rumus Hukum Ohm: V = I × R, I = V/R, R =
+            V/I
+          </p>
+        </div>
+
+        <div class="text-sm text-gray-500">
+          Quiz akan dilanjutkan secara otomatis...
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div
+      id="resultScreen"
+      class="hidden min-h-screen flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-white rounded-3xl card-shadow p-8 max-w-md w-full text-center"
+      >
+        <div id="resultIcon" class="text-8xl mb-6">🎉</div>
+        <h2 class="text-3xl font-bold text-gray-800 mb-4">Quiz Selesai!</h2>
+        <div id="finalStudentInfo" class="text-gray-600 mb-6"></div>
+
+        <div
+          class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-6"
+        >
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <div id="finalCorrect" class="text-3xl font-bold text-green-600">
+                0
+              </div>
+              <p class="text-sm text-gray-600">Benar</p>
+            </div>
+            <div>
+              <div id="finalWrong" class="text-3xl font-bold text-red-600">
+                0
+              </div>
+              <p class="text-sm text-gray-600">Salah</p>
+            </div>
+          </div>
+          <div class="border-t pt-4">
+            <div id="finalScore" class="text-4xl font-bold text-blue-600">
+              0
+            </div>
+            <p class="text-gray-600">Skor Akhir</p>
+          </div>
+        </div>
+
+        <div id="gradeMessage" class="mb-6 p-4 rounded-xl"></div>
+
+        <button
+          onclick="restartQuiz()"
+          class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-xl font-semibold text-lg hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all"
+        >
+          Ulangi Quiz
+        </button>
+      </div>
+    </div>
+
+    <!-- Answer Popup -->
+    <div
+      id="answerPopup"
+      class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    >
+      <div
+        class="bg-white rounded-2xl card-shadow p-6 max-w-sm w-full text-center transform scale-95 transition-all"
+      >
+        <div id="popupIcon" class="text-6xl mb-4"></div>
+        <h3 id="popupTitle" class="text-2xl font-bold mb-2"></h3>
+        <p id="popupMessage" class="text-gray-600 mb-4"></p>
+        <div
+          id="popupExplanation"
+          class="bg-gray-50 rounded-xl p-4 text-sm text-left"
+        ></div>
+      </div>
+    </div>
+
+    <script>
+      // Questions Database
+      const questions = [
+        // Calculation Questions (70 questions)
+        {
+          type: "Perhitungan",
+          question:
+            "Sebuah rangkaian memiliki tegangan 12V dan hambatan 4Ω. Berapakah arus yang mengalir?",
+          options: ["2A", "3A", "4A", "6A"],
+          correct: 0,
+          explanation: "Menggunakan Hukum Ohm: I = V/R = 12V/4Ω = 3A",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Jika arus yang mengalir 2A dan hambatan 6Ω, berapakah tegangannya?",
+          options: ["8V", "10V", "12V", "14V"],
+          correct: 2,
+          explanation: "Menggunakan Hukum Ohm: V = I × R = 2A × 6Ω = 12V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Tegangan 24V menghasilkan arus 3A. Berapakah hambatannya?",
+          options: ["6Ω", "8Ω", "9Ω", "12Ω"],
+          correct: 1,
+          explanation: "Menggunakan Hukum Ohm: R = V/I = 24V/3A = 8Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Sebuah lampu dengan hambatan 10Ω dihubungkan ke sumber 20V. Berapa arus yang mengalir?",
+          options: ["1A", "2A", "3A", "4A"],
+          correct: 1,
+          explanation: "I = V/R = 20V/10Ω = 2A",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Arus 5A mengalir melalui hambatan 8Ω. Berapa tegangan yang diperlukan?",
+          options: ["35V", "40V", "45V", "50V"],
+          correct: 1,
+          explanation: "V = I × R = 5A × 8Ω = 40V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika V = 15V dan I = 3A, maka R = ?",
+          options: ["3Ω", "4Ω", "5Ω", "6Ω"],
+          correct: 2,
+          explanation: "R = V/I = 15V/3A = 5Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Sebuah resistor 12Ω dialiri arus 2A. Berapa tegangan pada resistor?",
+          options: ["20V", "22V", "24V", "26V"],
+          correct: 2,
+          explanation: "V = I × R = 2A × 12Ω = 24V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Tegangan 36V dan hambatan 9Ω menghasilkan arus sebesar?",
+          options: ["3A", "4A", "5A", "6A"],
+          correct: 1,
+          explanation: "I = V/R = 36V/9Ω = 4A",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika I = 1.5A dan R = 8Ω, maka V = ?",
+          options: ["10V", "12V", "14V", "16V"],
+          correct: 1,
+          explanation: "V = I × R = 1.5A × 8Ω = 12V",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Hambatan yang diperlukan untuk membatasi arus 2A pada tegangan 18V adalah?",
+          options: ["7Ω", "8Ω", "9Ω", "10Ω"],
+          correct: 2,
+          explanation: "R = V/I = 18V/2A = 9Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Sebuah motor listrik dengan hambatan 5Ω dihubungkan ke sumber 25V. Arus yang mengalir?",
+          options: ["4A", "5A", "6A", "7A"],
+          correct: 1,
+          explanation: "I = V/R = 25V/5Ω = 5A",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika V = 48V dan I = 6A, berapa nilai R?",
+          options: ["6Ω", "7Ω", "8Ω", "9Ω"],
+          correct: 2,
+          explanation: "R = V/I = 48V/6A = 8Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Arus 0.5A mengalir melalui hambatan 20Ω. Tegangan yang diperlukan?",
+          options: ["8V", "10V", "12V", "15V"],
+          correct: 1,
+          explanation: "V = I × R = 0.5A × 20Ω = 10V",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Tegangan 30V menghasilkan arus 5A. Hambatan rangkaian adalah?",
+          options: ["5Ω", "6Ω", "7Ω", "8Ω"],
+          correct: 1,
+          explanation: "R = V/I = 30V/5A = 6Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Sebuah pemanas dengan hambatan 15Ω dihubungkan ke sumber 45V. Arus yang mengalir?",
+          options: ["2A", "3A", "4A", "5A"],
+          correct: 1,
+          explanation: "I = V/R = 45V/15Ω = 3A",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika I = 4A dan R = 7Ω, maka V = ?",
+          options: ["26V", "28V", "30V", "32V"],
+          correct: 1,
+          explanation: "V = I × R = 4A × 7Ω = 28V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Tegangan 21V dan arus 3A menghasilkan hambatan sebesar?",
+          options: ["6Ω", "7Ω", "8Ω", "9Ω"],
+          correct: 1,
+          explanation: "R = V/I = 21V/3A = 7Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Sebuah rangkaian dengan hambatan 16Ω dialiri arus 1.5A. Berapa tegangannya?",
+          options: ["22V", "24V", "26V", "28V"],
+          correct: 1,
+          explanation: "V = I × R = 1.5A × 16Ω = 24V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika V = 42V dan I = 7A, berapa nilai R?",
+          options: ["5Ω", "6Ω", "7Ω", "8Ω"],
+          correct: 1,
+          explanation: "R = V/I = 42V/7A = 6Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Arus 2.5A mengalir melalui hambatan 12Ω. Tegangan yang diperlukan?",
+          options: ["28V", "30V", "32V", "35V"],
+          correct: 1,
+          explanation: "V = I × R = 2.5A × 12Ω = 30V",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Tegangan 60V menghasilkan arus 4A. Berapakah nilai Hambatannya?",
+          options: ["12Ω", "15Ω", "18Ω", "20Ω"],
+          correct: 1,
+          explanation: "R = V/I = 60V/4A = 15Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Sebuah resistor 25Ω dihubungkan ke sumber 50V. Berapakah Arus yang mengalir?",
+          options: ["1A", "2A", "3A", "4A"],
+          correct: 1,
+          explanation: "I = V/R = 50V/25Ω = 2A",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika I = 3.5A dan R = 6Ω, maka V = ?",
+          options: ["19V", "21V", "23V", "25V"],
+          correct: 1,
+          explanation: "V = I × R = 3.5A × 6Ω = 21V",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Diketahui sebuah rangkaian memiliki Tegangan 35V dan arus 5A, berpakah nilai R (hambatan)?",
+          options: ["6Ω", "7Ω", "8Ω", "9Ω"],
+          correct: 1,
+          explanation: "R = V/I = 35V/5A = 7Ω",
+        },
+        {
+          type: "Perhitungan",
+          question: "Hambatan 18Ω dialiri arus 2A. Berapa Tegangannya?",
+          options: ["34V", "36V", "38V", "40V"],
+          correct: 1,
+          explanation: "V = I × R = 2A × 18Ω = 36V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika V = 54V dan I = 9A, berapa nilai R?",
+          options: ["5Ω", "6Ω", "7Ω", "8Ω"],
+          correct: 1,
+          explanation: "R = V/I = 54V/9A = 6Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Arus 1.2A mengalir melalui hambatan 15Ω. Berapa nilai dari Tegangannya?",
+          options: ["16V", "18V", "20V", "22V"],
+          correct: 1,
+          explanation: "V = I × R = 1.2A × 15Ω = 18V",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Tegangan 28V menghasilkan arus 4A. maka Hambatannya adalah.",
+          options: ["6Ω", "7Ω", "8Ω", "9Ω"],
+          correct: 1,
+          explanation: "R = V/I = 28V/4A = 7Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Resistor 22Ω dihubungkan ke sumber 44V. Berapa Arus yang mengalir?",
+          options: ["1A", "2A", "3A", "4A"],
+          correct: 1,
+          explanation: "I = V/R = 44V/22Ω = 2A",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika I = 2.8A dan R = 5Ω, maka V = ?",
+          options: ["12V", "14V", "16V", "18V"],
+          correct: 1,
+          explanation: "V = I × R = 2.8A × 5Ω = 14V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Tegangan 63V dan arus 7A, berapa nilai hambatannya?",
+          options: ["8Ω", "9Ω", "10Ω", "11Ω"],
+          correct: 1,
+          explanation: "R = V/I = 63V/7A = 9Ω",
+        },
+        {
+          type: "Perhitungan",
+          question: "Hambatan 14Ω dialiri arus 3A, berapa nilai Tegangannya?",
+          options: ["40V", "42V", "44V", "46V"],
+          correct: 1,
+          explanation: "V = I × R = 3A × 14Ω = 42V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika V = 72V dan I = 8A, berapa niali R?",
+          options: ["8Ω", "9Ω", "10Ω", "11Ω"],
+          correct: 1,
+          explanation: "R = V/I = 72V/8A = 9Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Arus 0.8A mengalir melalui hambatan 30Ω. Maka Tegangannya adalah.",
+          options: ["22V", "24V", "26V", "28V"],
+          correct: 1,
+          explanation: "V = I × R = 0.8A × 30Ω = 24V",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Tegangan 40V menghasilkan arus 8A. berapa nilai Hambatannya?",
+          options: ["4Ω", "5Ω", "6Ω", "7Ω"],
+          correct: 1,
+          explanation: "R = V/I = 40V/8A = 5Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Resistor 35Ω dihubungkan ke sumber 70V. Berapa Arus yang mengalir?",
+          options: ["1A", "2A", "3A", "4A"],
+          correct: 1,
+          explanation: "I = V/R = 70V/35Ω = 2A",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika I = 1.8A dan R = 10Ω, maka V = ?",
+          options: ["16V", "18V", "20V", "22V"],
+          correct: 1,
+          explanation: "V = I × R = 1.8A × 10Ω = 18V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Tegangan 56V dan arus 8A menghasilkan hambatan?",
+          options: ["6Ω", "7Ω", "8Ω", "9Ω"],
+          correct: 1,
+          explanation: "R = V/I = 56V/8A = 7Ω",
+        },
+        {
+          type: "Perhitungan",
+          question: "Hambatan 24Ω dialiri arus 2.5A. berapa nilai Tegangannya?",
+          options: ["58V", "60V", "62V", "64V"],
+          correct: 1,
+          explanation: "V = I × R = 2.5A × 24Ω = 60V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika V = 81V dan I = 9A, berapa nilai R?",
+          options: ["8Ω", "9Ω", "10Ω", "11Ω"],
+          correct: 1,
+          explanation: "R = V/I = 81V/9A = 9Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Arus 3.2A mengalir melalui hambatan 8Ω. berapa Tegangannya?",
+          options: ["24.6V", "25.6V", "26.6V", "27.6V"],
+          correct: 1,
+          explanation: "V = I × R = 3.2A × 8Ω = 25.6V",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Tegangan 45V menghasilkan arus 9A. berapa nilai Hambatannya?",
+          options: ["4Ω", "5Ω", "6Ω", "7Ω"],
+          correct: 1,
+          explanation: "R = V/I = 45V/9A = 5Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Resistor 40Ω dihubungkan ke sumber 80V. Maka Arus yang mengalir adalah.",
+          options: ["1A", "2A", "3A", "4A"],
+          correct: 1,
+          explanation: "I = V/R = 80V/40Ω = 2A",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika I = 4.5A dan R = 4Ω, maka V = ?",
+          options: ["16V", "18V", "20V", "22V"],
+          correct: 1,
+          explanation: "V = I × R = 4.5A × 4Ω = 18V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Tegangan 49V dan arus 7A menghasilkan hambatan?",
+          options: ["6Ω", "7Ω", "8Ω", "9Ω"],
+          correct: 1,
+          explanation: "R = V/I = 49V/7A = 7Ω",
+        },
+        {
+          type: "Perhitungan",
+          question: "Hambatan 28Ω dialiri arus 1.5A. Tegangannya?",
+          options: ["40V", "42V", "44V", "46V"],
+          correct: 1,
+          explanation: "V = I × R = 1.5A × 28Ω = 42V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika V = 96V dan I = 12A, berapa nilai R?",
+          options: ["7Ω", "8Ω", "9Ω", "10Ω"],
+          correct: 1,
+          explanation: "R = V/I = 96V/12A = 8Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Arus 2.4A mengalir melalui hambatan 12Ω. Berapa nilai Tegangan?",
+          options: ["26.8V", "28.8V", "30.8V", "32.8V"],
+          correct: 1,
+          explanation: "V = I × R = 2.4A × 12Ω = 28.8V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Tegangan 32V menghasilkan arus 4A, berapa nilai Hambatan?",
+          options: ["6Ω", "7Ω", "8Ω", "9Ω"],
+          correct: 2,
+          explanation: "R = V/I = 32V/4A = 8Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Resistor 45Ω dihubungkan ke sumber 90V. berapa nilai Arus yang mengalir?",
+          options: ["1A", "2A", "3A", "4A"],
+          correct: 1,
+          explanation: "I = V/R = 90V/45Ω = 2A",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika I = 3.6A dan R = 5Ω, maka V = ?",
+          options: ["16V", "18V", "20V", "22V"],
+          correct: 1,
+          explanation: "V = I × R = 3.6A × 5Ω = 18V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Tegangan 77V dan arus 11A menghasilkan hambatan sebesar?",
+          options: ["6Ω", "7Ω", "8Ω", "9Ω"],
+          correct: 1,
+          explanation: "R = V/I = 77V/11A = 7Ω",
+        },
+        {
+          type: "Perhitungan",
+          question: "Hambatan 32Ω dialiri arus 2A. Tegangannya adalah...",
+          options: ["62V", "64V", "66V", "68V"],
+          correct: 1,
+          explanation: "V = I × R = 2A × 32Ω = 64V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika V = 108V dan I = 12A, berapa niai R?",
+          options: ["8Ω", "9Ω", "10Ω", "11Ω"],
+          correct: 1,
+          explanation: "R = V/I = 108V/12A = 9Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Arus 1.6A mengalir melalui hambatan 25Ω. berapa nilai Tegangan?",
+          options: ["38V", "40V", "42V", "44V"],
+          correct: 1,
+          explanation: "V = I × R = 1.6A × 25Ω = 40V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Tegangan 39V menghasilkan arus 3A. berapa nilai Hambatan?",
+          options: ["11Ω", "12Ω", "13Ω", "14Ω"],
+          correct: 2,
+          explanation: "R = V/I = 39V/3A = 13Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Resistor 50Ω dihubungkan ke sumber 100V. berapakah Arus yang mengalir?",
+          options: ["1A", "2A", "3A", "4A"],
+          correct: 1,
+          explanation: "I = V/R = 100V/50Ω = 2A",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika I = 5.5A dan R = 6Ω, maka V = ?",
+          options: ["31V", "33V", "35V", "37V"],
+          correct: 1,
+          explanation: "V = I × R = 5.5A × 6Ω = 33V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Tegangan 84V dan arus 12A menghasilkan hambatan?",
+          options: ["6Ω", "7Ω", "8Ω", "9Ω"],
+          correct: 1,
+          explanation: "R = V/I = 84V/12A = 7Ω",
+        },
+        {
+          type: "Perhitungan",
+          question: "Hambatan 36Ω dialiri arus 1.5A. berapa nilai Tegangannya?",
+          options: ["52V", "54V", "56V", "58V"],
+          correct: 1,
+          explanation: "V = I × R = 1.5A × 36Ω = 54V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika V = 120V dan I = 15A, berapa R?",
+          options: ["7Ω", "8Ω", "9Ω", "10Ω"],
+          correct: 1,
+          explanation: "R = V/I = 120V/15A = 8Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Arus 2.2A mengalir melalui hambatan 18Ω. berapa nilai Tegangan?",
+          options: ["37.6V", "39.6V", "41.6V", "43.6V"],
+          correct: 1,
+          explanation: "V = I × R = 2.2A × 18Ω = 39.6V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Tegangan 65V menghasilkan arus 5A. berapa nilai Hambatan?",
+          options: ["11Ω", "12Ω", "13Ω", "14Ω"],
+          correct: 2,
+          explanation: "R = V/I = 65V/5A = 13Ω",
+        },
+        {
+          type: "Perhitungan",
+          question:
+            "Resistor 55Ω dihubungkan ke sumber 110V. Arus yang mengalir?",
+          options: ["1A", "2A", "3A", "4A"],
+          correct: 1,
+          explanation: "I = V/R = 110V/55Ω = 2A",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika I = 4.2A dan R = 7Ω, maka V = ?",
+          options: ["27.4V", "29.4V", "31.4V", "33.4V"],
+          correct: 1,
+          explanation: "V = I × R = 4.2A × 7Ω = 29.4V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Tegangan 91V dan arus 13A menghasilkan hambatans sebesar?",
+          options: ["6Ω", "7Ω", "8Ω", "9Ω"],
+          correct: 1,
+          explanation: "R = V/I = 91V/13A = 7Ω",
+        },
+        {
+          type: "Perhitungan",
+          question: "Hambatan 42Ω dialiri arus 2A. berapa nilai Tegangannya?",
+          options: ["82V", "84V", "86V", "88V"],
+          correct: 1,
+          explanation: "V = I × R = 2A × 42Ω = 84V",
+        },
+        {
+          type: "Perhitungan",
+          question: "Jika V = 132V dan I = 11A, berapa R?",
+          options: ["11Ω", "12Ω", "13Ω", "14Ω"],
+          correct: 1,
+          explanation: "R = V/I = 132V/11A = 12Ω",
+        },
+
+        // Theory Questions (30 questions)
+        {
+          type: "Teori",
+          question: "Apa yang dimaksud dengan muatan listrik?",
+          options: [
+            "Sifat dasar materi yang menyebabkan gaya tarik atau tolak",
+            "Aliran elektron dalam konduktor",
+            "Beda potensial antara dua titik",
+            "Hambatan terhadap aliran listrik",
+          ],
+          correct: 0,
+          explanation:
+            "Muatan listrik adalah sifat dasar dari materi yang menyebabkan gaya tarik atau tolak antar partikel.",
+        },
+        {
+          type: "Teori",
+          question: "Satuan untuk muatan listrik adalah?",
+          options: ["Ampere", "Volt", "Coulomb", "Ohm"],
+          correct: 2,
+          explanation: "Satuan muatan listrik adalah Coulomb (C).",
+        },
+        {
+          type: "Teori",
+          question: "Arus listrik adalah?",
+          options: [
+            "Hambatan terhadap aliran elektron",
+            "Laju aliran muatan listrik per satuan waktu",
+            "Gaya dorong elektron",
+            "Energi yang tersimpan",
+          ],
+          correct: 1,
+          explanation:
+            "Arus listrik adalah laju aliran muatan listrik yang melalui suatu titik dalam satuan waktu.",
+        },
+        {
+          type: "Teori",
+          question: "Satuan arus listrik adalah?",
+          options: ["Volt", "Ohm", "Ampere", "Watt"],
+          correct: 2,
+          explanation: "Satuan arus listrik adalah Ampere (A).",
+        },
+        {
+          type: "Teori",
+          question: "DC adalah singkatan dari?",
+          options: [
+            "Direct Current",
+            "Double Current",
+            "Dynamic Current",
+            "Dual Current",
+          ],
+          correct: 0,
+          explanation: "DC adalah Direct Current atau arus searah.",
+        },
+        {
+          type: "Teori",
+          question: "AC adalah singkatan dari?",
+          options: [
+            "Automatic Current",
+            "Alternating Current",
+            "Active Current",
+            "Amplified Current",
+          ],
+          correct: 1,
+          explanation: "AC adalah Alternating Current atau arus bolak-balik.",
+        },
+        {
+          type: "Teori",
+          question: "Contoh sumber arus DC adalah?",
+          options: ["Listrik PLN", "Generator AC", "Baterai", "Transformator"],
+          correct: 2,
+          explanation:
+            "Baterai dan aki adalah contoh sumber arus DC (Direct Current).",
+        },
+        {
+          type: "Teori",
+          question: "Listrik rumah tangga menggunakan jenis arus?",
+          options: ["DC", "AC", "Campuran AC-DC", "Arus statis"],
+          correct: 1,
+          explanation:
+            "Listrik rumah tangga menggunakan arus AC (Alternating Current).",
+        },
+        {
+          type: "Teori",
+          question: "Tegangan listrik adalah?",
+          options: [
+            "Aliran elektron",
+            "Gaya dorong yang menyebabkan muatan bergerak",
+            "Hambatan listrik",
+            "Energi kinetik elektron",
+          ],
+          correct: 1,
+          explanation:
+            "Tegangan listrik adalah gaya dorong yang menyebabkan muatan listrik bergerak dalam suatu rangkaian.",
+        },
+        {
+          type: "Teori",
+          question: "Satuan tegangan listrik adalah?",
+          options: ["Ampere", "Ohm", "Volt", "Watt"],
+          correct: 2,
+          explanation: "Satuan tegangan listrik adalah Volt (V).",
+        },
+        {
+          type: "Teori",
+          question: "Hambatan listrik adalah?",
+          options: [
+            "Aliran muatan listrik",
+            "Sejauh mana bahan menahan aliran listrik",
+            "Gaya dorong elektron",
+            "Energi listrik",
+          ],
+          correct: 1,
+          explanation:
+            "Hambatan listrik adalah sejauh mana suatu bahan menahan aliran listrik.",
+        },
+        {
+          type: "Teori",
+          question: "Satuan hambatan listrik adalah?",
+          options: ["Volt", "Ampere", "Ohm", "Coulomb"],
+          correct: 2,
+          explanation: "Satuan hambatan listrik adalah Ohm (Ω).",
+        },
+        {
+          type: "Teori",
+          question: "Hukum Ohm menyatakan hubungan antara?",
+          options: ["V, I, dan R", "P, V, dan I", "E, I, dan t", "Q, V, dan C"],
+          correct: 0,
+          explanation:
+            "Hukum Ohm menyatakan hubungan antara tegangan (V), arus (I), dan hambatan (R).",
+        },
+        {
+          type: "Teori",
+          question: "Rumus Hukum Ohm untuk mencari arus adalah?",
+          options: ["I = V × R", "I = V / R", "I = R / V", "I = V + R"],
+          correct: 1,
+          explanation: "Rumus Hukum Ohm untuk mencari arus adalah I = V/R.",
+        },
+        {
+          type: "Teori",
+          question: "Rumus Hukum Ohm untuk mencari tegangan adalah?",
+          options: ["V = I / R", "V = I × R", "V = R / I", "V = I + R"],
+          correct: 1,
+          explanation:
+            "Rumus Hukum Ohm untuk mencari tegangan adalah V = I × R.",
+        },
+        {
+          type: "Teori",
+          question: "Rumus Hukum Ohm untuk mencari hambatan adalah?",
+          options: ["R = V × I", "R = V + I", "R = V / I", "R = I / V"],
+          correct: 2,
+          explanation: "Rumus Hukum Ohm untuk mencari hambatan adalah R = V/I.",
+        },
+        {
+          type: "Teori",
+          question:
+            "Menurut Hukum Ohm, jika tegangan naik dan hambatan tetap, maka arus akan?",
+          options: ["Turun", "Naik", "Tetap", "Menjadi nol"],
+          correct: 1,
+          explanation:
+            "Menurut Hukum Ohm (I = V/R), jika V naik dan R tetap, maka I akan naik.",
+        },
+        {
+          type: "Teori",
+          question: "Jika hambatan naik dan tegangan tetap, maka arus akan?",
+          options: ["Naik", "Turun", "Tetap", "Menjadi tak hingga"],
+          correct: 1,
+          explanation:
+            "Menurut Hukum Ohm (I = V/R), jika R naik dan V tetap, maka I akan turun.",
+        },
+        {
+          type: "Teori",
+          question: "Konduktor adalah bahan yang?",
+          options: [
+            "Menghambat aliran listrik",
+            "Mudah mengalirkan listrik",
+            "Tidak dapat dialiri listrik",
+            "Menyimpan listrik",
+          ],
+          correct: 1,
+          explanation:
+            "Konduktor adalah bahan yang mudah mengalirkan arus listrik karena memiliki hambatan rendah.",
+        },
+        {
+          type: "Teori",
+          question: "Isolator adalah bahan yang?",
+          options: [
+            "Mudah mengalirkan listrik",
+            "Menghambat aliran listrik",
+            "Menyimpan listrik",
+            "Menghasilkan listrik",
+          ],
+          correct: 1,
+          explanation:
+            "Isolator adalah bahan yang menghambat atau tidak mengalirkan arus listrik.",
+        },
+        {
+          type: "Teori",
+          question: "Contoh konduktor yang baik adalah?",
+          options: ["Karet", "Plastik", "Tembaga", "Kayu"],
+          correct: 2,
+          explanation:
+            "Tembaga adalah contoh konduktor yang baik karena mudah mengalirkan listrik.",
+        },
+        {
+          type: "Teori",
+          question: "Contoh isolator adalah?",
+          options: ["Aluminium", "Besi", "Karet", "Perak"],
+          correct: 2,
+          explanation:
+            "Karet adalah contoh isolator yang menghambat aliran listrik.",
+        },
+        {
+          type: "Teori",
+          question: "Dalam rangkaian listrik, simbol untuk hambatan adalah?",
+          options: ["Garis lurus", "Zigzag", "Lingkaran", "Segitiga"],
+          correct: 1,
+          explanation:
+            "Simbol hambatan dalam rangkaian listrik adalah garis zigzag.",
+        },
+        {
+          type: "Teori",
+          question: "Alat untuk mengukur arus listrik adalah?",
+          options: ["Voltmeter", "Ammeter", "Ohmmeter", "Wattmeter"],
+          correct: 1,
+          explanation: "Ammeter adalah alat untuk mengukur arus listrik.",
+        },
+        {
+          type: "Teori",
+          question: "Alat untuk mengukur tegangan listrik adalah?",
+          options: ["Ammeter", "Voltmeter", "Ohmmeter", "Galvanometer"],
+          correct: 1,
+          explanation: "Voltmeter adalah alat untuk mengukur tegangan listrik.",
+        },
+        {
+          type: "Teori",
+          question: "Alat untuk mengukur hambatan listrik adalah?",
+          options: ["Ammeter", "Voltmeter", "Ohmmeter", "Barometer"],
+          correct: 2,
+          explanation: "Ohmmeter adalah alat untuk mengukur hambatan listrik.",
+        },
+        {
+          type: "Teori",
+          question:
+            "Dalam rangkaian seri, arus yang mengalir pada setiap komponen adalah?",
+          options: ["Berbeda-beda", "Sama", "Berlawanan arah", "Nol"],
+          correct: 1,
+          explanation:
+            "Dalam rangkaian seri, arus yang mengalir pada setiap komponen adalah sama.",
+        },
+        {
+          type: "Teori",
+          question:
+            "Dalam rangkaian paralel, tegangan pada setiap cabang adalah?",
+          options: ["Berbeda-beda", "Sama", "Berlawanan", "Nol"],
+          correct: 1,
+          explanation:
+            "Dalam rangkaian paralel, tegangan pada setiap cabang adalah sama.",
+        },
+        {
+          type: "Teori",
+          question: "Hukum Ohm berlaku untuk?",
+          options: [
+            "Semua bahan",
+            "Hanya konduktor",
+            "Bahan ohmic",
+            "Hanya isolator",
+          ],
+          correct: 2,
+          explanation:
+            "Hukum Ohm berlaku untuk bahan ohmic yang memiliki hubungan linear antara V dan I.",
+        },
+        {
+          type: "Teori",
+          question: "Faktor yang mempengaruhi hambatan kawat adalah?",
+          options: [
+            "Panjang, luas penampang, dan jenis bahan",
+            "Hanya panjang",
+            "Hanya luas penampang",
+            "Hanya suhu",
+          ],
+          correct: 0,
+          explanation:
+            "Hambatan kawat dipengaruhi oleh panjang, luas penampang, jenis bahan, dan suhu.",
+        },
+      ];
+
+      // Game State
+      let currentQuestionIndex = 0;
+      let score = 0;
+      let correctAnswers = 0;
+      let wrongAnswers = 0;
+      let timeLeft = 30;
+      let timer;
+      let studentName = "";
+      let studentClass = "";
+
+      // DOM Elements
+      const startScreen = document.getElementById("startScreen");
+      const quizScreen = document.getElementById("quizScreen");
+      const breakScreen = document.getElementById("breakScreen");
+      const resultScreen = document.getElementById("resultScreen");
+      const answerPopup = document.getElementById("answerPopup");
+
+      let breakTimer;
+      let breakTimeLeft = 60;
+
+      // Learning tips for break screen
+      const learningTips = [
+        "Ingat rumus Hukum Ohm: V = I × R, I = V/R, R = V/I",
+        "Arus DC mengalir satu arah, AC mengalir bolak-balik",
+        "Konduktor mudah mengalirkan listrik, isolator menghambat",
+        "Satuan: Arus (Ampere), Tegangan (Volt), Hambatan (Ohm)",
+        "Dalam rangkaian seri: arus sama, tegangan terbagi",
+        "Dalam rangkaian paralel: tegangan sama, arus terbagi",
+        "Ammeter mengukur arus, Voltmeter mengukur tegangan",
+        "Hambatan kawat dipengaruhi panjang, luas, dan bahan",
+        "Jika tegangan naik dan hambatan tetap, arus akan naik",
+        "Tembaga adalah konduktor yang baik, karet adalah isolator",
+      ];
+
+      // Start Quiz
+      document
+        .getElementById("studentForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          studentName = document.getElementById("studentName").value;
+          studentClass = document.getElementById("studentClass").value;
+
+          document.getElementById(
+            "studentInfo"
+          ).textContent = `${studentName} - ${studentClass}`;
+
+          startScreen.classList.add("hidden");
+          quizScreen.classList.remove("hidden");
+
+          loadQuestion();
+          startTimer();
+        });
+
+      // Load Question
+      function loadQuestion() {
+        const question = questions[currentQuestionIndex];
+
+        document.getElementById("currentQuestion").textContent =
+          currentQuestionIndex + 1;
+        document.getElementById("questionType").textContent = question.type;
+        document.getElementById("questionText").textContent = question.question;
+
+        const optionsContainer = document.getElementById("optionsContainer");
+        optionsContainer.innerHTML = "";
+
+        question.options.forEach((option, index) => {
+          const button = document.createElement("button");
+          button.className =
+            "w-full p-4 text-left bg-gray-50 hover:bg-blue-50 rounded-xl border-2 border-transparent hover:border-blue-200 transition-all transform hover:scale-105";
+          button.innerHTML = `<span class="font-medium text-blue-600">${String.fromCharCode(
+            65 + index
+          )}.</span> ${option}`;
+          button.onclick = () => selectAnswer(index);
+          optionsContainer.appendChild(button);
+        });
+
+        updateProgress();
+        resetTimer();
+      }
+
+      // Select Answer
+      function selectAnswer(selectedIndex) {
+        clearInterval(timer);
+
+        const question = questions[currentQuestionIndex];
+        const isCorrect = selectedIndex === question.correct;
+
+        if (isCorrect) {
+          correctAnswers++;
+          score += 10;
+          showPopup(true, question.explanation);
+        } else {
+          wrongAnswers++;
+          showPopup(false, question.explanation);
+        }
+
+        updateScore();
+
+        setTimeout(() => {
+          hidePopup();
+          nextQuestion();
+        }, 3000);
+      }
+
+      // Show Popup
+      function showPopup(isCorrect, explanation) {
+        const popup = document.getElementById("answerPopup");
+        const icon = document.getElementById("popupIcon");
+        const title = document.getElementById("popupTitle");
+        const message = document.getElementById("popupMessage");
+        const explanationDiv = document.getElementById("popupExplanation");
+
+        if (isCorrect) {
+          icon.textContent = "🎉";
+          title.textContent = "Benar!";
+          title.className = "text-2xl font-bold mb-2 text-green-600";
+          message.textContent = "Jawaban Anda tepat!";
+        } else {
+          icon.textContent = "😔";
+          title.textContent = "Salah!";
+          title.className = "text-2xl font-bold mb-2 text-red-600";
+          message.textContent = "Jawaban Anda kurang tepat.";
+        }
+
+        explanationDiv.innerHTML = `<strong>Penjelasan:</strong><br>${explanation}`;
+
+        popup.classList.remove("hidden");
+        popup.querySelector(".bg-white").classList.add("scale-100");
+      }
+
+      // Hide Popup
+      function hidePopup() {
+        const popup = document.getElementById("answerPopup");
+        popup.querySelector(".bg-white").classList.remove("scale-100");
+        setTimeout(() => {
+          popup.classList.add("hidden");
+        }, 300);
+      }
+
+      // Next Question
+      function nextQuestion() {
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex >= questions.length) {
+          showResults();
+        } else if (
+          currentQuestionIndex % 10 === 0 &&
+          currentQuestionIndex < questions.length
+        ) {
+          // Show break screen every 10 questions
+          showBreakScreen();
+        } else {
+          loadQuestion();
+          startTimer();
+        }
+      }
+
+      // Show Break Screen
+      function showBreakScreen() {
+        quizScreen.classList.add("hidden");
+        breakScreen.classList.remove("hidden");
+
+        document.getElementById("completedQuestions").textContent =
+          currentQuestionIndex;
+
+        // Show random learning tip
+        const randomTip =
+          learningTips[Math.floor(Math.random() * learningTips.length)];
+        document.getElementById("breakTip").textContent = randomTip;
+
+        startBreakTimer();
+      }
+
+      // Break Timer Functions
+      function startBreakTimer() {
+        breakTimeLeft = 60;
+        updateBreakTimerDisplay();
+
+        breakTimer = setInterval(() => {
+          breakTimeLeft--;
+          updateBreakTimerDisplay();
+          updateBreakProgress();
+
+          if (breakTimeLeft <= 0) {
+            clearInterval(breakTimer);
+            continueQuiz();
+          }
+        }, 1000);
+      }
+
+      function updateBreakTimerDisplay() {
+        document.getElementById("breakTimer").textContent = breakTimeLeft;
+      }
+
+      function updateBreakProgress() {
+        const progress = (breakTimeLeft / 60) * 100;
+        document.getElementById("breakProgressBar").style.width =
+          progress + "%";
+      }
+
+      function continueQuiz() {
+        breakScreen.classList.add("hidden");
+        quizScreen.classList.remove("hidden");
+        loadQuestion();
+        startTimer();
+      }
+
+      // Timer Functions
+      function startTimer() {
+        timeLeft = 30;
+        updateTimerDisplay();
+
+        timer = setInterval(() => {
+          timeLeft--;
+          updateTimerDisplay();
+
+          if (timeLeft <= 5) {
+            document
+              .getElementById("timer")
+              .classList.add("timer-warning", "text-red-600");
+          }
+
+          if (timeLeft <= 0) {
+            clearInterval(timer);
+            selectAnswer(-1); // Time's up, wrong answer
+          }
+        }, 1000);
+      }
+
+      function resetTimer() {
+        timeLeft = 30;
+        document
+          .getElementById("timer")
+          .classList.remove("timer-warning", "text-red-600");
+        document.getElementById("timer").classList.add("text-blue-600");
+      }
+
+      function updateTimerDisplay() {
+        document.getElementById("timer").textContent = timeLeft;
+      }
+
+      // Update Progress
+      function updateProgress() {
+        const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+        document.getElementById("progressBar").style.width = progress + "%";
+      }
+
+      // Update Score
+      function updateScore() {
+        document.getElementById("correctCount").textContent = correctAnswers;
+        document.getElementById("wrongCount").textContent = wrongAnswers;
+        document.getElementById("scoreDisplay").textContent = score;
+      }
+
+      // Show Results
+      function showResults() {
+        quizScreen.classList.add("hidden");
+        resultScreen.classList.remove("hidden");
+
+        document.getElementById(
+          "finalStudentInfo"
+        ).textContent = `${studentName} - ${studentClass}`;
+        document.getElementById("finalCorrect").textContent = correctAnswers;
+        document.getElementById("finalWrong").textContent = wrongAnswers;
+        document.getElementById("finalScore").textContent = score;
+
+        const percentage = (correctAnswers / questions.length) * 100;
+        const gradeMessage = document.getElementById("gradeMessage");
+
+        if (percentage >= 90) {
+          gradeMessage.innerHTML =
+            '<div class="text-green-600 font-bold">🏆 Excellent! Nilai A</div><p class="text-sm text-gray-600 mt-2">Pemahaman Anda tentang kelistrikan dasar sangat baik!</p>';
+          gradeMessage.className =
+            "mb-6 p-4 rounded-xl bg-green-50 border border-green-200";
+          document.getElementById("resultIcon").textContent = "🏆";
+        } else if (percentage >= 80) {
+          gradeMessage.innerHTML =
+            '<div class="text-blue-600 font-bold">⭐ Very Good! Nilai B</div><p class="text-sm text-gray-600 mt-2">Pemahaman Anda baik, terus tingkatkan!</p>';
+          gradeMessage.className =
+            "mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200";
+          document.getElementById("resultIcon").textContent = "⭐";
+        } else if (percentage >= 70) {
+          gradeMessage.innerHTML =
+            '<div class="text-yellow-600 font-bold">👍 Good! Nilai C</div><p class="text-sm text-gray-600 mt-2">Cukup baik, masih ada ruang untuk perbaikan.</p>';
+          gradeMessage.className =
+            "mb-6 p-4 rounded-xl bg-yellow-50 border border-yellow-200";
+          document.getElementById("resultIcon").textContent = "👍";
+        } else {
+          gradeMessage.innerHTML =
+            '<div class="text-red-600 font-bold">📚 Keep Learning! Nilai D</div><p class="text-sm text-gray-600 mt-2">Pelajari lagi materi kelistrikan dasar.</p>';
+          gradeMessage.className =
+            "mb-6 p-4 rounded-xl bg-red-50 border border-red-200";
+          document.getElementById("resultIcon").textContent = "📚";
+        }
+      }
+
+      // Restart Quiz
+      function restartQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        correctAnswers = 0;
+        wrongAnswers = 0;
+
+        resultScreen.classList.add("hidden");
+        startScreen.classList.remove("hidden");
+
+        document.getElementById("studentName").value = "";
+        document.getElementById("studentClass").value = "";
+      }
+
+      // Shuffle questions for variety
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+
+      // Initialize
+      shuffleArray(questions);
+    </script>
+    <script>
+      (function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document;
+          if (b) {
+            var d = b.createElement("script");
+            d.innerHTML =
+              "window.__CF$cv$params={r:'969e1d2bd55cea76',t:'MTc1NDMxMTEyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName("head")[0].appendChild(d);
+          }
+        }
+        if (document.body) {
+          var a = document.createElement("iframe");
+          a.height = 1;
+          a.width = 1;
+          a.style.position = "absolute";
+          a.style.top = 0;
+          a.style.left = 0;
+          a.style.border = "none";
+          a.style.visibility = "hidden";
+          document.body.appendChild(a);
+          if ("loading" !== document.readyState) c();
+          else if (window.addEventListener)
+            document.addEventListener("DOMContentLoaded", c);
+          else {
+            var e = document.onreadystatechange || function () {};
+            document.onreadystatechange = function (b) {
+              e(b);
+              "loading" !== document.readyState &&
+                ((document.onreadystatechange = e), c());
+            };
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>
