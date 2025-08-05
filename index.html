@@ -30,7 +30,7 @@
             <div class="text-center mb-8">
                 <div class="text-6xl mb-4">⚡</div>
                 <h1 class="text-3xl font-bold text-gray-800 mb-2">Quiz Kelistrikan Dasar</h1>
-                <p class="text-gray-600">Konsentrasi Keahlian TKR</p>
+                <p class="text-gray-600">SMK - Konsep Dasar Kelistrikan</p>
             </div>
             
             <form id="studentForm" class="space-y-6">
@@ -54,13 +54,15 @@
                 <div class="bg-blue-50 p-4 rounded-xl mb-4">
                     <h3 class="font-semibold text-blue-800 mb-2">Aturan Quiz:</h3>
                     <ul class="text-sm text-blue-700 space-y-1">
-                        <li>maksimalkan your "prefrontal korteks" </li>
+                        <li>maksimalkan your "prefrontal korteks"</li>
                     </ul>
                 </div>
                 
+
+                
                 <button type="submit" 
                         class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-xl font-semibold text-lg hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all pulse-animation">
-                    Gazz Mulai Quiz
+                    Mulai Quiz ⚡
                 </button>
             </form>
         </div>
@@ -73,7 +75,7 @@
             <div class="flex justify-between items-center">
                 <div>
                     <h2 class="text-xl font-bold text-gray-800" id="studentInfo"></h2>
-                    <p class="text-gray-600">Soal <span id="currentQuestion">1</span> ayoo tebak berapa</p>
+                    <p class="text-gray-600">Soal <span id="currentQuestion">1</span> dari 100</p>
                 </div>
                 <div class="text-right">
                     <div id="timer" class="text-3xl font-bold text-blue-600">30</div>
@@ -191,6 +193,19 @@
             <h3 id="popupTitle" class="text-2xl font-bold mb-2"></h3>
             <p id="popupMessage" class="text-gray-600 mb-4"></p>
             <div id="popupExplanation" class="bg-gray-50 rounded-xl p-4 text-sm text-left"></div>
+        </div>
+    </div>
+
+    <!-- Waiting Notification -->
+    <div id="waitingNotification" class="hidden fixed top-4 right-4 bg-blue-600 text-white px-6 py-4 rounded-xl shadow-lg z-50 transform translate-x-full transition-all duration-300">
+        <div class="flex items-center space-x-3">
+            <div class="animate-spin">⏳</div>
+            <div>
+                <div class="font-semibold">Menunggu soal berikutnya...</div>
+                <div class="text-sm opacity-90">
+                    <span id="waitingCountdown">0</span> detik lagi
+                </div>
+            </div>
         </div>
     </div>
 
@@ -975,7 +990,8 @@
 
         // Select Answer
         function selectAnswer(selectedIndex, correctIndex = null) {
-            // Don't clear timer - let it continue running
+            // Clear the timer since answer was selected
+            clearInterval(timer);
             
             const question = questions[currentQuestionIndex];
             let isCorrect;
@@ -995,7 +1011,7 @@
                 button.classList.add('opacity-50', 'cursor-not-allowed');
             });
             
-            // Highlight selected answer (only if not time's up)
+            // Highlight selected answer
             if (selectedIndex >= 0) {
                 optionButtons[selectedIndex].classList.add('ring-2', 'ring-blue-500');
             }
@@ -1017,10 +1033,23 @@
             
             updateScore();
             
-            // Hide popup after 3 seconds but don't move to next question yet
+            // Show popup for 3 seconds, then show waiting notification
             setTimeout(() => {
                 hidePopup();
+                
+                // Show waiting notification if there's remaining time
+                const remainingTime = timeLeft;
+                if (remainingTime > 0) {
+                    showWaitingNotification(remainingTime);
+                }
             }, 3000);
+            
+            // Wait for the full 30 seconds before moving to next question
+            const remainingTime = timeLeft * 1000; // Convert to milliseconds
+            setTimeout(() => {
+                hideWaitingNotification();
+                nextQuestion();
+            }, remainingTime > 3000 ? remainingTime : 3000);
         }
 
         // Sound Functions
@@ -1087,12 +1116,76 @@
             popup.querySelector('.bg-white').classList.add('scale-100');
         }
 
+        // Show Time Up Popup
+        function showTimeUpPopup(explanation) {
+            const popup = document.getElementById('answerPopup');
+            const icon = document.getElementById('popupIcon');
+            const title = document.getElementById('popupTitle');
+            const message = document.getElementById('popupMessage');
+            const explanationDiv = document.getElementById('popupExplanation');
+            
+            playWrongSound(); // Play wrong sound
+            icon.textContent = '⏰';
+            title.textContent = 'Waktu Habis!';
+            title.className = 'text-2xl font-bold mb-2 text-orange-600';
+            message.textContent = 'Waktu untuk menjawab telah habis.';
+            
+            explanationDiv.innerHTML = `<strong>Penjelasan:</strong><br>${explanation}`;
+            
+            popup.classList.remove('hidden');
+            popup.querySelector('.bg-white').classList.add('scale-100');
+        }
+
         // Hide Popup
         function hidePopup() {
             const popup = document.getElementById('answerPopup');
             popup.querySelector('.bg-white').classList.remove('scale-100');
             setTimeout(() => {
                 popup.classList.add('hidden');
+            }, 300);
+        }
+
+        // Show Waiting Notification
+        let waitingTimer;
+        function showWaitingNotification(remainingSeconds) {
+            const notification = document.getElementById('waitingNotification');
+            const countdown = document.getElementById('waitingCountdown');
+            
+            countdown.textContent = remainingSeconds;
+            notification.classList.remove('hidden');
+            
+            // Slide in animation
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+                notification.classList.add('translate-x-0');
+            }, 100);
+            
+            // Update countdown every second
+            let timeLeft = remainingSeconds;
+            waitingTimer = setInterval(() => {
+                timeLeft--;
+                countdown.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(waitingTimer);
+                }
+            }, 1000);
+        }
+
+        // Hide Waiting Notification
+        function hideWaitingNotification() {
+            const notification = document.getElementById('waitingNotification');
+            
+            if (waitingTimer) {
+                clearInterval(waitingTimer);
+            }
+            
+            // Slide out animation
+            notification.classList.remove('translate-x-0');
+            notification.classList.add('translate-x-full');
+            
+            setTimeout(() => {
+                notification.classList.add('hidden');
             }, 300);
         }
 
@@ -1186,9 +1279,35 @@
                 
                 if (timeLeft <= 0) {
                     clearInterval(timer);
-                    selectAnswer(-1); // Time's up, wrong answer
+                    // Time's up - treat as wrong answer and move to next question
+                    handleTimeUp();
                 }
             }, 1000);
+        }
+
+        // Handle when time runs out
+        function handleTimeUp() {
+            const question = questions[currentQuestionIndex];
+            
+            // Disable all option buttons
+            const optionButtons = document.querySelectorAll('#optionsContainer button');
+            optionButtons.forEach(button => {
+                button.disabled = true;
+                button.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+            
+            // Count as wrong answer
+            wrongAnswers++;
+            updateScore();
+            
+            // Show time's up popup
+            showTimeUpPopup(question.explanation);
+            
+            // Move to next question after 3 seconds (no waiting needed since time already up)
+            setTimeout(() => {
+                hidePopup();
+                nextQuestion();
+            }, 3000);
         }
 
         function resetTimer() {
@@ -1271,5 +1390,5 @@
         // Initialize
         shuffleArray(questions);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a6ac93103bc753',t:'MTc1NDQwMDg4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a6cf45d25986a1',t:'MTc1NDQwMjMxMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
